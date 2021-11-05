@@ -1,7 +1,6 @@
 package it.unibo.oop.lab.collections2;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * 
@@ -29,6 +28,8 @@ public class SocialNetworkUserImpl<U extends User> extends UserImpl implements S
      * 
      * think of what type of keys and values would best suit the requirements
      */
+	final Map<String, Set<U>> peopleFollowed = new HashMap<>();
+	
 
     /*
      * [CONSTRUCTORS]
@@ -57,6 +58,9 @@ public class SocialNetworkUserImpl<U extends User> extends UserImpl implements S
     public SocialNetworkUserImpl(final String name, final String surname, final String user, final int userAge) {
         super(name, surname, user, userAge);
     }
+    public SocialNetworkUserImpl(final String name, final String surname, final String user) {
+        super(name, surname, user, -1);
+    }
 
     /*
      * [METHODS]
@@ -66,17 +70,37 @@ public class SocialNetworkUserImpl<U extends User> extends UserImpl implements S
 
     @Override
     public boolean addFollowedUser(final String circle, final U user) {
-        return false;
+       Set<U> friends = this.peopleFollowed.get(circle);
+       if(friends == null) {
+    	   friends = new HashSet<>();
+    	   peopleFollowed.put(circle, friends);
+       }
+       /*for(U usr : friends) {
+    	   if(!usr.getUsername().equals(user.getUsername())) {
+    		   friends.add(user);
+    		   return true;
+    	   }
+       }*/
+       return friends.add(user);
     }
 
     @Override
     public Collection<U> getFollowedUsersInGroup(final String groupName) {
-        return null;
+        final Collection<U> collU = this.peopleFollowed.get(groupName);
+        if(collU != null) {
+        	return new ArrayList<>(collU);
+        }
+        return Collections.emptyList();
     }
 
     @Override
     public List<U> getFollowedUsers() {
-        return null;
+    	final List<U> listU = new ArrayList<>();
+    	for(Set<U> setU : peopleFollowed.values()) {
+    		for(U usr : setU) {
+    			listU.add(usr);
+    		}
+    	}
+    	return new ArrayList<>(listU);
     }
-
 }
