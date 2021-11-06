@@ -39,6 +39,8 @@ public class StrictBankAccount implements BankAccount {
         if (checkUser(usrID)) {
             this.balance += amount;
             increaseTransactionsCount();
+        } else {
+        	throw new WrongAccountHolderException();
         }
     }
 
@@ -47,10 +49,17 @@ public class StrictBankAccount implements BankAccount {
      * {@inheritDoc}
      */
     public void withdraw(final int usrID, final double amount) {
-        if (checkUser(usrID) && isWithdrawAllowed(amount)) {
-            this.balance -= amount;
-            increaseTransactionsCount();
+        if (checkUser(usrID)) {
+        	if (isWithdrawAllowed(amount)) {
+        		this.balance -= amount;
+        		increaseTransactionsCount();
+        	} else {
+        		throw new NotEnoughFoundsException();
+        	}
+        } else {
+        	throw new WrongAccountHolderException();
         }
+        
     }
 
     /**
@@ -60,7 +69,8 @@ public class StrictBankAccount implements BankAccount {
     public void depositFromATM(final int usrID, final double amount) {
         if (totalTransactionCount < maximumAllowedATMTransactions) {
             this.deposit(usrID, amount - StrictBankAccount.ATM_TRANSACTION_FEE);
-            increaseTransactionsCount();
+        } else {
+        	throw new TransactionsOverQuotaException();
         }
     }
 
@@ -71,6 +81,8 @@ public class StrictBankAccount implements BankAccount {
     public void withdrawFromATM(final int usrID, final double amount) {
         if (totalTransactionCount < maximumAllowedATMTransactions) {
             this.withdraw(usrID, amount + StrictBankAccount.ATM_TRANSACTION_FEE);
+        } else {
+        	throw new TransactionsOverQuotaException();
         }
     }
 
@@ -97,9 +109,15 @@ public class StrictBankAccount implements BankAccount {
      */
     public void computeManagementFees(final int usrID) {
         final double feeAmount = MANAGEMENT_FEE + (totalTransactionCount * StrictBankAccount.TRANSACTION_FEE);
-        if (checkUser(usrID) && isWithdrawAllowed(feeAmount)) {
-            balance -= MANAGEMENT_FEE + totalTransactionCount * StrictBankAccount.TRANSACTION_FEE;
-            totalTransactionCount = 0;
+        if (checkUser(usrID)) {
+        	if (isWithdrawAllowed(feeAmount)) {
+        		balance -= MANAGEMENT_FEE + totalTransactionCount * StrictBankAccount.TRANSACTION_FEE;
+        		totalTransactionCount = 0;
+        	} else {
+        		throw new NotEnoughFoundsException();
+        	}
+        } else {
+        	throw new WrongAccountHolderException();
         }
     }
 
